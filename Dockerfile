@@ -1,30 +1,11 @@
-FROM golang:1.12 as build
+FROM alpine
 
-ENV GO111MODULE on
-ENV GOPROXY "https://goproxy.io"
+MAINTAINER etcdkeeper
 
-WORKDIR /opt
-RUN mkdir etcdkeeper
-ADD . /opt/etcdkeeper
-WORKDIR /opt/etcdkeeper/src/etcdkeeper
+RUN  apk add --no-cache tzdata
+RUN  cp /usr/share/zoneinfo/Asia/Shanghai /etc/localtime
 
-RUN go mod download \
-    && go build -o etcdkeeper.bin main.go
-
-
-FROM alpine:3.10
-
-ENV HOST="0.0.0.0"
-ENV PORT="8080"
-
-# RUN apk add --no-cache ca-certificates
-
-RUN mkdir /lib64 && ln -s /lib/libc.musl-x86_64.so.1 /lib64/ld-linux-x86-64.so.2
-
-WORKDIR /opt/etcdkeeper
-COPY --from=build /opt/etcdkeeper/src/etcdkeeper/etcdkeeper.bin .
 ADD assets assets
+ADD etcdkeeper /etcdkeeper
 
-EXPOSE ${PORT}
-
-ENTRYPOINT ./etcdkeeper.bin -h $HOST -p $PORT
+ENTRYPOINT ["/etcdkeeper"]
