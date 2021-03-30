@@ -42,7 +42,7 @@ func Register(name string, provide Provider) {
 
 type Manager struct {
 	cookieName  string     //private cookiename
-	lock        sync.Mutex // protects session
+	lock        *sync.Mutex // protects session
 	provider    Provider
 	maxlifetime int64
 }
@@ -52,7 +52,7 @@ func NewManager(provideName, cookieName string, maxlifetime int64) (*Manager, er
 	if !ok {
 		return nil, fmt.Errorf("session: unknown provide %q (forgotten import?)", provideName)
 	}
-	return &Manager{provider: provider, cookieName: cookieName, maxlifetime: maxlifetime}, nil
+	return &Manager{provider: provider, cookieName: cookieName, maxlifetime: maxlifetime,lock:new(sync.Mutex)}, nil
 }
 
 //get Session
